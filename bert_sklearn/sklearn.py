@@ -149,7 +149,7 @@ class BaseBertEstimator(BaseEstimator):
     def __init__(self, bert_model='bert-base-uncased',
                  bert_config_json=None, bert_vocab=None,
                  from_tf=False, do_lower_case=None, label_list=None,
-                 num_mlp_hiddens=500, num_mlp_layers=0, restore_file=None,
+                 num_mlp_hiddens=100, num_mlp_layers=0, restore_file=None,
                  epochs=3, max_seq_length=128, train_batch_size=32,
                  eval_batch_size=8, learning_rate=2e-5, warmup_proportion=0.1,
                  gradient_accumulation_steps=1, fp16=False, loss_scale=0,
