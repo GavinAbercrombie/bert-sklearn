@@ -16,9 +16,6 @@ def CNN(D):
     """
     
     print("Using CNN with D=%d"%(D))
-    print('\nHERE',
-          D.shape,
-          '\n')
     layers = [nn.Conv1d((None,D), 2, 2),
               nn.MaxPool1d(1),
               nn.Linear(D, 2)]
