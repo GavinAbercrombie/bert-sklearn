@@ -83,7 +83,7 @@ class BertPlusCNN(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.input_dim = config.hidden_size
 
-        self.mlp = CNN(D=self.input_dim,
+        self.cnn = CNN(D=self.input_dim,
                        n=self.num_mlp_layers,
                        H=self.num_mlp_hiddens,
                        K=self.num_labels,
@@ -104,7 +104,7 @@ class BertPlusCNN(BertPreTrainedModel):
             output = pooled_output
             output = self.dropout(output)
 
-        output = self.mlp(output)
+        output = self.cnn(output)
 
         if labels is not None:
             if self.model_type == "text_classifier":
