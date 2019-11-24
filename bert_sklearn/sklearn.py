@@ -212,7 +212,6 @@ class BaseBertEstimator(BaseEstimator):
         self.model = get_model(bert_model=self.bert_model,
                                bert_config_json=self.bert_config_json,
                                from_tf=self.from_tf,
-                               num_labels=self.num_labels,
                                model_type=self.model_type,
                                state_dict=state_dict,
                                local_rank=self.local_rank)
@@ -306,7 +305,6 @@ class BaseBertEstimator(BaseEstimator):
                     self.label_list = np.unique(flatten(labels))
 
             # build label2id and id2label maps
-            self.num_labels = len(self.label_list)
             for (i, label) in enumerate(self.label_list):
                 self.label2id[label] = i
                 self.id2label[i] = label
@@ -401,7 +399,6 @@ class BaseBertEstimator(BaseEstimator):
             'params': self.get_params(),
             'class_name' : type(self).__name__,
             'model_type' : self.model_type,
-            'num_labels' : self.num_labels,
             'id2label'   : self.id2label,
             'label2id'   : self.label2id,
             'do_lower_case': self.do_lower_case,
@@ -426,12 +423,10 @@ class BaseBertEstimator(BaseEstimator):
         self.set_params(**params)
 
         self.model_type = state['model_type']
-        self.num_labels = state['num_labels']
         self.do_lower_case = state['do_lower_case']
         self.bert_config_json = state['bert_config_json']
         self.bert_vocab = state['bert_vocab']
         self.from_tf = False
-        self.num_labels = state['num_labels']
         self.input_text_pairs = state['input_text_pairs']
         self.id2label = state['id2label']
         self.label2id = state['label2id']
