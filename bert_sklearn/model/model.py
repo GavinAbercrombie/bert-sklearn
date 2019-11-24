@@ -53,7 +53,7 @@ class BertPlusCNN(BertPreTrainedModel):
                                           input_mask,
                                           output_all_encoded_layers=False)
         output = pooled_output
-        output.unsqueeze(1)
+        
         output = self.cnn(output)
 
         if labels is not None:
