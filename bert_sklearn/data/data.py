@@ -22,8 +22,6 @@ class TextFeaturesDataset(Dataset):
         text_b for input data text pairs
     y : list of string or list of floats
         labels/targets for data
-    model_type : string
-        specifies 'text_classifier' or 'text_regressor' model
     label2id : dict map of string to int
         label map for classifer labels
     max_seq_length : int
@@ -43,7 +41,6 @@ class TextFeaturesDataset(Dataset):
         self.y = y
 
         self.len = len(self.X1)
-        self.model_type = model_type
         self.label2id = label2id
         self.max_seq_length = max_seq_length
         self.tokenizer = tokenizer
@@ -69,11 +66,8 @@ class TextFeaturesDataset(Dataset):
 
             label = self.y[index]
 
-            if self.model_type == 'text_classifier':
-                label_id = self.label2id[label]
-                target = torch.tensor(label_id, dtype=torch.long)
-            elif self.model_type == 'text_regressor':
-                target = torch.tensor(label, dtype=torch.float32)
+            label_id = self.label2id[label]
+            target = torch.tensor(label_id, dtype=torch.long)
             return input_ids, segment_ids, input_mask, target
         else:
             return input_ids, segment_ids, input_mask
@@ -95,8 +89,6 @@ class TokenFeaturesDataset(Dataset):
     y : list of list of strings
         input token tags
 
-    model_type : string
-        specifies 'classifier' or 'regressor' model
     label2id : dict map of string to int
         label map for classifer labels
     max_seq_length : int
@@ -185,7 +177,6 @@ def get_dataset(X1, X2, y, config):
 
         text_a, text_b, labels = X1, X2, y
         dataset = TextFeaturesDataset(text_a, text_b, labels,
-                                      config.model_type,
                                       config.label2id,
                                       config.max_seq_length,
                                       config.tokenizer)
