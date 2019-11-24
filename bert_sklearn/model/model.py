@@ -55,7 +55,7 @@ class BertPlusCNN(BertPreTrainedModel):
         output = pooled_output
         #output = self.dropout(output)
 
-        output = F.relu(self.cnn(output))
+        output = self.cnn(output)
 
         if labels is not None:
             loss_criterion = nn.CrossEntropyLoss(reduction='none')
