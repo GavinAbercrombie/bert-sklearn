@@ -91,7 +91,7 @@ def get_model(bert_model='bert-base-uncased',
     else:
         # Load from pre-trained model archive
         print("Loading %s model..."%(bert_model))
-        model = BertPlusMLP.from_pretrained(bert_model,
+        model = BertPlusCNN.from_pretrained(bert_model,
                                             cache_dir=cache_dir,
                                             state_dict=state_dict,
                                             num_labels=num_labels,
