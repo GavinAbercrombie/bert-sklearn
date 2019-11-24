@@ -16,7 +16,10 @@ def CNN(D):
     """
     
     print("Using CNN with D=%d"%(D))
-    layers = [nn.Conv1d(D, 2, 2),
+    print('\nHERE',
+          D.shape,
+          '\n')
+    layers = [nn.Conv1d((None,D), 2, 2),
               nn.MaxPool1d(1),
               nn.Linear(D, 2)]
     return torch.nn.Sequential(*layers)
