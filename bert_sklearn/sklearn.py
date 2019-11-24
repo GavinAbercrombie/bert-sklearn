@@ -309,7 +309,7 @@ class BaseBertEstimator(BaseEstimator):
             self.load_bert()
 
         # to fix BatchLayer1D prob in rare case last batch is a singlton w MLP
-        drop_last_batch = False if self.num_mlp_layers == 0 else True
+        drop_last_batch = True
 
         # create a finetune config object
         config = model2config(self)
