@@ -31,7 +31,6 @@ class TextFeaturesDataset(Dataset):
     """
     def __init__(self,
                  X1, X2, y,
-                 model_type,
                  label2id,
                  max_seq_length,
                  tokenizer):
