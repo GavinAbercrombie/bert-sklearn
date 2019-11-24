@@ -51,7 +51,9 @@ class BertPlusCNN(BertPreTrainedModel):
                                           segment_ids,
                                           input_mask,
                                           output_all_encoded_layers=False)
-
+        output = pooled_output
+        output = self.dropout(output)
+   
         output = self.cnn(output)
 
         if labels is not None:
