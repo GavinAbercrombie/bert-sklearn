@@ -180,7 +180,6 @@ class BaseBertEstimator(BaseEstimator):
         self._validate_hyperparameters()
 
         print("Building sklearn text classifier...")
-        self.model_type = "text_classifier"
 
         self.logger = get_logger(logfile)
         self.logger.info("Loading model:\n" + str(self))
@@ -212,7 +211,6 @@ class BaseBertEstimator(BaseEstimator):
         self.model = get_model(bert_model=self.bert_model,
                                bert_config_json=self.bert_config_json,
                                from_tf=self.from_tf,
-                               model_type=self.model_type,
                                state_dict=state_dict,
                                local_rank=self.local_rank)
 
@@ -299,21 +297,12 @@ class BaseBertEstimator(BaseEstimator):
         if is_classifier(self):
             # if the label_list not specified, then infer it from training data
             if self.label_list is None:
-                if self.model_type == "text_classifier":
-                    self.label_list = np.unique(labels)
-                elif self.model_type == "token_classifier":
-                    self.label_list = np.unique(flatten(labels))
+                self.label_list = np.unique(labels)
 
             # build label2id and id2label maps
             for (i, label) in enumerate(self.label_list):
                 self.label2id[label] = i
                 self.id2label[i] = label
-
-            # calculate majority label for token_classifier
-            if self.model_type == "token_classifier":
-                c = Counter(flatten(y))
-                self.majority_label = c.most_common()[0][0]
-                self.majority_id = self.label2id[self.majority_label]
 
         if load_at_start:
             self.load_tokenizer()
@@ -398,7 +387,6 @@ class BaseBertEstimator(BaseEstimator):
         state = {
             'params': self.get_params(),
             'class_name' : type(self).__name__,
-            'model_type' : self.model_type,
             'id2label'   : self.id2label,
             'label2id'   : self.label2id,
             'do_lower_case': self.do_lower_case,
@@ -422,7 +410,6 @@ class BaseBertEstimator(BaseEstimator):
         params = state['params']
         self.set_params(**params)
 
-        self.model_type = state['model_type']
         self.do_lower_case = state['do_lower_case']
         self.bert_config_json = state['bert_config_json']
         self.bert_vocab = state['bert_vocab']
