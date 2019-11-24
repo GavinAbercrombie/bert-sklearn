@@ -4,7 +4,7 @@ import torch.nn as nn
 from .pytorch_pretrained import BertModel
 from .pytorch_pretrained import BertPreTrainedModel
 
-def LinearBlock(H1, H2)#, p):
+def LinearBlock(H1, H2):#, p):
     print('CNN')
     return nn.Sequential(
         #nn.Linear(H1, H2),
