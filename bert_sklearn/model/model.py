@@ -30,7 +30,7 @@ def CNN(D, n, H, K, p):
     else:
         print("Using CNN with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
         layers = [nn.Conv1d(D, K, 2),
-                  nn.MaxPool1d(1)
+                  nn.MaxPool1d(1),
                   nn.Linear(H, K)]
         return torch.nn.Sequential(*layers)
         #layers = [nn.BatchNorm1d(D),
