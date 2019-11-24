@@ -16,10 +16,10 @@ def CNN(D):
     """
     
     print("Using CNN with D=%d"%(D))
-    layers = [nn.Conv1d(D, 2, 2),
-              nn.MaxPool1d(1),
-              nn.Linear(D, 2)]
-    return torch.nn.Sequential(*layers)
+    conv1 = nn.Conv1d(D, 2, 2)
+    #nn.MaxPool1d(1),
+    #nn.Linear(D, 2)]
+    #return torch.nn.Sequential(*layers)
 
 
 class BertPlusCNN(BertPreTrainedModel):
@@ -53,8 +53,8 @@ class BertPlusCNN(BertPreTrainedModel):
                                           output_all_encoded_layers=False)
         output = pooled_output
         #output = self.dropout(output)
-        print(output.shape)
-        output = self.cnn(output)
+
+        output = F.relu(self.cnn(output))
 
         if labels is not None:
             loss_criterion = nn.CrossEntropyLoss(reduction='none')
