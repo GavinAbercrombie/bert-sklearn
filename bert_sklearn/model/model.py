@@ -5,7 +5,6 @@ from .pytorch_pretrained import BertModel
 from .pytorch_pretrained import BertPreTrainedModel
 
 def LinearBlock(H1, H2, p):
-    print('CNN')
     return nn.Sequential(
         nn.Linear(H1, H2),
         nn.BatchNorm1d(H2),
@@ -15,9 +14,9 @@ def LinearBlock(H1, H2, p):
         nn.Dropout(p))
         #nn.Linear(H1, H2))
 
-def MLP(D, n, H, K, p):
+def CNN(D, n, H, K, p):
     """
-    MLP w batchnorm and dropout.
+    CNN w batchnorm and dropout.
 
     Parameters
     ----------
@@ -32,7 +31,7 @@ def MLP(D, n, H, K, p):
         print("Defaulting to linear classifier/regressor")
         return nn.Linear(D, K)
     else:
-        print("Using mlp with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
+        print("Using CNN with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
         layers = [nn.BatchNorm1d(D),
                   LinearBlock(D, H, p)]
         for _ in range(n-1):
@@ -41,9 +40,9 @@ def MLP(D, n, H, K, p):
         return torch.nn.Sequential(*layers)
 
 
-class BertPlusMLP(BertPreTrainedModel):
+class BertPlusCNN(BertPreTrainedModel):
     """
-    Bert model with MLP classifier/regressor head.
+    Bert model with CNN classifier head.
 
     Based on pytorch_pretrained_bert.modeling.BertForSequenceClassification
 
@@ -53,7 +52,7 @@ class BertPlusMLP(BertPreTrainedModel):
         stores configuration of BertModel
 
     model_type : string
-         'text_classifier' | 'text_regressor' | 'token_classifier'
+         'text_classifier'
 
     num_labels : int
         For a classifier, this is the number of distinct classes.
@@ -73,7 +72,7 @@ class BertPlusMLP(BertPreTrainedModel):
                  num_mlp_layers=2,
                  num_mlp_hiddens=500):
 
-        super(BertPlusMLP, self).__init__(config)
+        super(BertPlusCNN, self).__init__(config)
         self.model_type = model_type
         self.num_labels = num_labels
         self.num_mlp_layers = num_mlp_layers
@@ -83,7 +82,7 @@ class BertPlusMLP(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.input_dim = config.hidden_size
 
-        self.mlp = MLP(D=self.input_dim,
+        self.mlp = CNN(D=self.input_dim,
                        n=self.num_mlp_layers,
                        H=self.num_mlp_hiddens,
                        K=self.num_labels,
