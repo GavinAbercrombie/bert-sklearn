@@ -3,7 +3,7 @@ import torch
 from .pytorch_pretrained import BertTokenizer, BasicTokenizer
 from .pytorch_pretrained import PYTORCH_PRETRAINED_BERT_CACHE
 
-from .model import BertPlusMLP
+from .model import BertPlusCNN
 
 def get_basic_tokenizer(do_lower_case):
     """
@@ -48,7 +48,7 @@ def get_model(bert_model='bert-base-uncased',
               state_dict=None,
               local_rank=-1):
     """
-    Get a BertPlusMLP model.
+    Get a BertPlusCNN model.
 
     Parameters
     ----------
@@ -71,8 +71,8 @@ def get_model(bert_model='bert-base-uncased',
 
     Returns
     -------
-    model : BertPlusMLP
-        BERT model plus mlp head
+    model : BertPlusCNN
+        BERT model plus CNN head
     """
 
     cache_dir = PYTORCH_PRETRAINED_BERT_CACHE/'distributed_{}'.format(local_rank)
@@ -80,7 +80,7 @@ def get_model(bert_model='bert-base-uncased',
     if bert_config_json is not None:
         # load from a tf checkpoint file, pytorch checkpoint file,
         # or a pytorch state dict
-        model = BertPlusMLP.from_model_ckpt(config_file_or_dict=bert_config_json,
+        model = BertPlusCNN.from_model_ckpt(config_file_or_dict=bert_config_json,
                                             weights_path=bert_model,
                                             state_dict=state_dict,
                                             from_tf=from_tf,
