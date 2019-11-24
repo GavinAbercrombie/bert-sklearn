@@ -5,8 +5,6 @@ Overall flow:
 
     # define model
     model = BertClassifier()       # text/text pair classification
-    model = BertRegressor()        # text/text pair regression
-    model = BertTokenClassifier()  # token sequence classification
 
     # fit model to training data
     model.fit(X_train, y_train)
@@ -33,12 +31,6 @@ Model inputs X, y:
     For text classification tasks:
         y = 1D list-like of string labels
 
-    For text regression  tasks:
-        y = 1D list-like of floats
-
-    For token classification tasks:
-        X = 2D list-like of token strings
-        y = 2D list-like of token tags
 """
 
 import sys
@@ -105,11 +97,6 @@ class BaseBertEstimator(BaseEstimator):
         if the  bert_model is a tensorflow checkpoint that needs to be converted
     do_lower_case : bool
         inform the BERT tokenizer to lowercase all strings before tokenizing
-    num_mlp_hiddens : int
-        the number of hidden neurons in each layer of the mlp
-    num_mlp_layers : int
-        the number of mlp layers. If set to 0, then defualts
-        to the linear classifier/regresor in the original Google paper and code
     restore_file : string
         file to restore model state from previous savepoint
     epochs : int
@@ -148,8 +135,7 @@ class BaseBertEstimator(BaseEstimator):
     """
     def __init__(self, bert_model='bert-base-uncased',
                  bert_config_json=None, bert_vocab=None,
-                 from_tf=False, do_lower_case=None, label_list=None,
-                 num_mlp_hiddens=100, num_mlp_layers=0, restore_file=None,
+                 from_tf=False, do_lower_case=None, label_list=None, restore_file=None,
                  epochs=3, max_seq_length=128, train_batch_size=32,
                  eval_batch_size=8, learning_rate=2e-5, warmup_proportion=0.1,
                  gradient_accumulation_steps=1, fp16=False, loss_scale=0,
@@ -166,8 +152,6 @@ class BaseBertEstimator(BaseEstimator):
         self.from_tf = from_tf
         self.do_lower_case = do_lower_case
         self.label_list = label_list
-        self.num_mlp_hiddens = num_mlp_hiddens
-        self.num_mlp_layers = num_mlp_layers
         self.restore_file = restore_file
         self.epochs = epochs
         self.max_seq_length = max_seq_length
@@ -195,18 +179,8 @@ class BaseBertEstimator(BaseEstimator):
 
         self._validate_hyperparameters()
 
-        # not good to use 'isinstance' :-( but the init code for these
-        # classes are similar. So keep the ugly hack for now...
-        if isinstance(self, BertClassifier):
-            print("Building sklearn text classifier...")
-            self.model_type = "text_classifier"
-        elif isinstance(self, BertTokenClassifier):
-            print("Building sklearn token classifier...")
-            self.model_type = "token_classifier"
-        elif isinstance(self, BertRegressor):
-            print("Building sklearn text regressor...")
-            self.model_type = "text_regressor"
-            self.num_labels = 1
+        print("Building sklearn text classifier...")
+        self.model_type = "text_classifier"
 
         self.logger = get_logger(logfile)
         self.logger.info("Loading model:\n" + str(self))
@@ -228,7 +202,7 @@ class BaseBertEstimator(BaseEstimator):
 
     def load_bert(self, state_dict=None):
         """
-        Load a BertPlusMLP model from a pretrained checkpoint.
+        Load a BertPlusCNN model from a pretrained checkpoint.
 
         This will be a pretrained BERT ready to be finetuned.
         """
@@ -240,8 +214,6 @@ class BaseBertEstimator(BaseEstimator):
                                from_tf=self.from_tf,
                                num_labels=self.num_labels,
                                model_type=self.model_type,
-                               num_mlp_layers=self.num_mlp_layers,
-                               num_mlp_hiddens=self.num_mlp_hiddens,
                                state_dict=state_dict,
                                local_rank=self.local_rank)
 
@@ -255,14 +227,6 @@ class BaseBertEstimator(BaseEstimator):
             if self.bert_model not in SUPPORTED_MODELS:
                 raise ValueError("The bert model '%s' is not supported. The list of supported "
                                  "models is %s." % (self.bert_model, SUPPORTED_MODELS))
-
-        if (not isinstance(self.num_mlp_hiddens, int) or self.num_mlp_hiddens < 1):
-            raise ValueError("num_mlp_hiddens must be an integer >= 1, got %s"%
-                             self.num_mlp_hiddens)
-
-        if (not isinstance(self.num_mlp_layers, int) or self.num_mlp_layers < 0):
-            raise ValueError("num_mlp_layers must be an integer >= 0, got %s"%
-                             self.num_mlp_layers)
 
         if (not isinstance(self.epochs, int) or self.epochs < 1):
             raise ValueError("epochs must be an integer >= 1, got %s" %self.epochs)
@@ -543,273 +507,6 @@ class BertClassifier(BaseBertEstimator, ClassifierMixin):
         return y_pred
 
 
-class BertRegressor(BaseBertEstimator, RegressorMixin):
-    """
-    A text regressor built on top of a pretrained Bert model.
-    """
-    def predict(self, X):
-        """
-        Predict method for regression.
-
-        Parameters
-        ----------
-        X : 1D or 2D list-like of strings
-            Input text, or text pairs
-
-        Returns
-        ----------
-        y_pred: 1D numpy array of float
-            predicted regressor float value
-
-        Raises
-        ----------
-        NotFittedError - if model has not been fitted yet
-        """
-        check_is_fitted(self, ["model", "tokenizer"])
-        texts_a, texts_b = unpack_data(X)
-
-        dataloader, config = self.setup_eval(texts_a, texts_b, labels=None)
-        device = config.device
-
-        ypred_list = []
-        sys.stdout.flush()
-        batch_iter = pbar(dataloader, desc="Predicting", leave=True)
-
-        for batch in batch_iter:
-            batch = tuple(t.to(device) for t in batch)
-            with torch.no_grad():
-                y_pred = self.model(*batch)
-            ypred_list.append(y_pred.detach().cpu().numpy())
-        y_pred = np.vstack(tuple(ypred_list)).reshape(-1,)
-        return y_pred
-
-
-class BertTokenClassifier(BaseBertEstimator, ClassifierMixin):
-    """
-    A token sequence classifier built on top of a pretrained Bert model.
-    """
-    def get_max_token_len(self, token_list):
-        """
-        Get max length of bert tokens for a token list
-
-        Parameters
-        ----------
-        token_list: list of list of token strings
-        """
-        # check if the BERT wordpiece tokenizer has been loaded, if not load it
-        try:
-            check_is_fitted(self, ["tokenizer"])
-        except NotFittedError:
-            self.load_tokenizer()
-
-        bert_token_lengths = [len(flatten([self.tokenizer.tokenize(token) for token in tokens]))
-                              for tokens in token_list]
-
-        return np.max(bert_token_lengths)
-
-    def predict_proba(self, X):
-        """
-        Make class probability predictions.
-
-        Parameters
-        ----------
-        X : 2D list of list of token strings
-
-        Returns
-        ----------
-        y_probs: 3D numpy array of floats
-            probability estimates for each tag for each token in each
-            input token list in X
-
-        Raises
-        ----------
-        NotFittedError - if model has not been fitted yet
-        """
-        check_is_fitted(self, ["model", "tokenizer"])
-
-        y_probs = []
-
-        texts_a, texts_b = to_numpy(X), None
-        dataloader, config = self.setup_eval(texts_a, texts_b, labels=None)
-        device = config.device
-
-        sys.stdout.flush()
-        batch_iter = pbar(dataloader, desc="Predicting", leave=True)
-
-        for batch in batch_iter:
-            # get the token_starts mask from batch
-            x1, x2, x3, token_starts_mask = batch
-
-            # put BERT input features onto device
-            batch = (x1, x2, x3)
-            batch = tuple(t.to(device) for t in batch)
-            with torch.no_grad():
-                logits = self.model(*batch)
-
-            # valid tokens are where mask is '1'
-            logits = logits[token_starts_mask == 1]
-
-            # calculate the original token list lengths from token_starts mask
-            lengths = torch.sum(token_starts_mask, 1)
-
-            # softmax over logits
-            y_prob = F.softmax(logits, dim=-1)
-
-            # to numpy
-            y_prob = y_prob.detach().cpu().numpy()
-
-            # re-assemble the tokens based on the lengths
-            start = 0
-            for length in  lengths:
-                y_probs.append(y_prob[start:start + length])
-                start += length
-
-        # predict majority label for any tokens that have been truncated by max_seq_len
-        for i, (x, y_prob) in enumerate(zip(X, y_probs)):
-            if len(x) > len(y_prob):
-
-                # create rows for all the truncated tokens with prob=1
-                # for majority_label/majority_id
-                y_prob_xtra = np.zeros_like(y_prob[-1])
-                y_prob_xtra[self.majority_id] = 1.0
-
-                length = len(x) - len(y_prob)
-                y_prob_xtra = np.tile(y_prob_xtra, (length, 1))
-
-                y_probs[i] = np.vstack((y_prob, y_prob_xtra))
-        return y_probs
-
-    def predict(self, X):
-        """
-        Make most probable class prediction on input data.
-
-        Parameters
-        ----------
-        X : 2D list of list of token strings
-
-        Returns
-        ----------
-        y_preds: 2D numpy array of string
-            predicted tag for each token in each input token list
-
-        Raises
-        ----------
-        NotFittedError - if model has not been fitted yet
-        """
-        check_is_fitted(self, ["model", "tokenizer"])
-
-        y_preds = []
-        texts_a, texts_b = to_numpy(X), None
-        dataloader, config = self.setup_eval(texts_a, texts_b, labels=None)
-        device = config.device
-
-        sys.stdout.flush()
-        batch_iter = pbar(dataloader, desc="Predicting", leave=True)
-
-        for batch in batch_iter:
-            # peel off the token_starts mask from batch
-            x1, x2, x3, token_starts_mask = batch
-
-            # put BERT input features onto device
-            batch = (x1, x2, x3)
-            batch = tuple(t.to(device) for t in batch)
-            with torch.no_grad():
-                logits = self.model(*batch)
-
-            # valid tokens are where mask is '1'
-            logits = logits[token_starts_mask == 1]
-
-            # calculate the original token list lengths from token_starts mask
-            lengths = torch.sum(token_starts_mask, 1)
-
-            # get predicts
-            _, y_pred = torch.max(logits, 1)
-            y_pred = y_pred.detach().cpu().numpy()
-
-            # convert to class_ids to class labels
-            y_pred = [self.id2label[y_i] for y_i in y_pred]
-
-            # re-assemble the tokens into their original input form from the lengths
-            start = 0
-            for length in  lengths:
-                y_preds.append(y_pred[start:start + length])
-                start += length
-
-        # predict majority label for any tokens that have been truncated by max_seq_len
-        for x, y in zip(X, y_preds):
-            if len(x) > len(y):
-                y.extend([self.majority_label] * (len(x) - len(y)))
-        return y_preds
-
-    def score(self, X, y, average='micro'):
-        """
-        Score model on test/eval data.
-
-        Parameters
-        ----------
-        X : 2D list of list of token strings
-        y : 2D list of list of token tags/labels
-        average : str, , [None, 'binary' (default), 'micro', 'macro', 'samples', 'weighted']
-            sklearn.metrics.f1_score parameter to determine how to scores across
-            multiple classes
-        Returns
-        ----------
-        f1: float
-            f1 wrt to the ignore_labels i.e 'O' for NER
-
-        Raises
-        ----------
-        NotFittedError - if model has not been fitted yet
-        """
-        y_preds = self.predict(X)
-        label_list = self.label_list
-
-        if self.ignore_label is not None:
-            label_list = list(set(label_list) - set(self.ignore_label))
-
-        f1 = 100 * f1_score(flatten(y), flatten(y_preds), average=average, labels=label_list)
-        return f1
-
-
-    def tokens_proba(self, tokens, prob=None, verbose=True):
-        """
-        Print tag probabilities for each token.
-        """
-        if prob is None:
-            prob = self.predict_proba([tokens])
-            prob = np.array(prob)[0]
-        if verbose:
-            cols = list(self.id2label.values())
-            pd.set_option('display.float_format', lambda x: '%.2f' % x)
-            df = pd.DataFrame(prob, columns=cols)
-            df.insert(0, "token", tokens)
-            if IN_COLAB:
-                print('\n',df) # fix formatting in google colab
-            else:
-                print(df)
-        return prob
-
-    def tag_text_proba(self, text, verbose=True):
-        """
-        Tokenize text and print tag probabilities for each token.
-        """
-        tokens = self.basic_tokenizer.tokenize(text)
-        return self.tokens_proba(tokens, verbose=verbose)
-
-    def tag_text(self, text, verbose=True):
-        """
-        Tokenize text and print most probable token tags.
-        """
-        tokens = self.basic_tokenizer.tokenize(text)
-        tags = self.predict(np.array([tokens]))[0]
-        if verbose:                
-            data = {"token": tokens, "predicted tags": tags}
-            df = pd.DataFrame(data=data)
-            if IN_COLAB:
-                print('\n',df) # fix formatting in google colab
-            else:
-                print(df)
-        return tags
 
 
 def load_model(filename):
@@ -828,10 +525,7 @@ def load_model(filename):
     state = torch.load(filename)
     class_name = state['class_name']
 
-    classes = {
-        'BertClassifier': BertClassifier,
-        'BertRegressor' : BertRegressor,
-        'BertTokenClassifier' : BertTokenClassifier}
+    classes = {'BertClassifier': BertClassifier}
 
     # call the constructor to load the model
     model_ctor = classes[class_name]
