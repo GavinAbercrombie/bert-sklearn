@@ -172,22 +172,14 @@ def get_dataset(X1, X2, y, config):
     config : FinetuneConfig
         Parameters for finetuning BER
     """
-    # text/text pair  classification and regression tasks
-    if (config.model_type == 'text_classifier') or (config.model_type == 'text_regressor'):
+    # text/text pair  classification  tasks
 
-        text_a, text_b, labels = X1, X2, y
-        dataset = TextFeaturesDataset(text_a, text_b, labels,
+    text_a, text_b, labels = X1, X2, y
+    dataset = TextFeaturesDataset(text_a, text_b, labels,
                                       config.label2id,
                                       config.max_seq_length,
                                       config.tokenizer)
-    # token sequence  tasks
-    elif config.model_type == 'token_classifier':
-        tokens, labels = X1, y
-        dataset = TokenFeaturesDataset(tokens,
-                                       labels,
-                                       config.label2id,
-                                       config.max_seq_length,
-                                       config.tokenizer)
+
     return dataset
 
 
