@@ -9,8 +9,8 @@ def LinearBlock(H1, H2, p):
     return nn.Sequential(
         #nn.Linear(H1, H2),
         #nn.BatchNorm1d(H2),
-        nn.Conv2d(H1, H2, kernel_size=1),
-        nn.MaxPool2d(kernel_size=2),
+        nn.Conv2d(H1, H2, kernel_size=1, stride=1, padding=1),
+        nn.MaxPool2d(kernel_size=2, stride=2, padding=0),
         nn.ReLU(),
         #nn.Dropout(p)
         nn.Linear(H1, H2))
