@@ -4,12 +4,15 @@ import torch.nn as nn
 from .pytorch_pretrained import BertModel
 from .pytorch_pretrained import BertPreTrainedModel
 
-def LinearBlock(H1, H2, p):
+def LinearBlock(H1, H2)#, p):
     return nn.Sequential(
-        nn.Linear(H1, H2),
-        nn.BatchNorm1d(H2),
+        #nn.Linear(H1, H2),
+        #nn.BatchNorm1d(H2),
+        nn.Conv2d(H1, H2),
+        nn.MaxPool2d(H2),
         nn.ReLU(),
-        nn.Dropout(p))
+        #nn.Dropout(p)
+        nn.Linear(H1, H2))
 
 def MLP(D, n, H, K, p):
     """
