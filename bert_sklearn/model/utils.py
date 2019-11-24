@@ -54,16 +54,6 @@ def get_model(bert_model='bert-base-uncased',
     ----------
     bert_model : string
         one of SUPPORTED_MODELS i.e 'bert-base-uncased','bert-large-uncased'
-    num_labels : int
-        For a classifier, this is the number of distinct classes.
-        For a regressor his will be 1.
-    model_type : string
-        specifies 'classifier' or 'regressor' model
-    num_mlp_layers : int
-        The number of mlp layers. If set to 0, then defualts
-        to the linear classifier/regresor as in the original Google code.
-    num_mlp_hiddens : int
-        The number of hidden neurons in each layer of the mlp.
     state_dict : collections.OrderedDict object
          an optional state dictionnary
     local_rank : (int)
@@ -83,20 +73,12 @@ def get_model(bert_model='bert-base-uncased',
         model = BertPlusCNN.from_model_ckpt(config_file_or_dict=bert_config_json,
                                             weights_path=bert_model,
                                             state_dict=state_dict,
-                                            from_tf=from_tf,
-                                            num_labels=num_labels,
-                                            model_type=model_type,
-                                            num_mlp_hiddens=num_mlp_hiddens,
-                                            num_mlp_layers=num_mlp_layers)
+                                            from_tf=from_tf)
     else:
         # Load from pre-trained model archive
         print("Loading %s model..."%(bert_model))
         model = BertPlusCNN.from_pretrained(bert_model,
                                             cache_dir=cache_dir,
-                                            state_dict=state_dict,
-                                            num_labels=num_labels,
-                                            model_type=model_type,
-                                            num_mlp_hiddens=num_mlp_hiddens,
-                                            num_mlp_layers=num_mlp_layers)
+                                            state_dict=state_dict)
 
     return model
