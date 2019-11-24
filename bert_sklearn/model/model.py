@@ -4,7 +4,7 @@ import torch.nn as nn
 from .pytorch_pretrained import BertModel
 from .pytorch_pretrained import BertPreTrainedModel
 
-def CNN(D, n, H, K, p):
+def CNN(D, K):
     """
     CNN.
 
@@ -18,7 +18,7 @@ def CNN(D, n, H, K, p):
     print("Using CNN with D=%d,H=%d,K=%d,n=%d"%(D, H, K))
     layers = [nn.Conv1d(D, K, 2),
               nn.MaxPool1d(1),
-              nn.Linear(H, K)]
+              nn.Linear(D, K)]
     return torch.nn.Sequential(*layers)
 
 
