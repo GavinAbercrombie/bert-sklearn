@@ -20,7 +20,7 @@ def CNN(D):
     conv1 = nn.Conv1d(D, 2, 2)
     #nn.MaxPool1d(1),
     #nn.Linear(D, 2)]
-    #return torch.nn.Sequential(*layers)
+    return torch.nn.Sequential(conv1)
 
 
 class BertPlusCNN(BertPreTrainedModel):
@@ -53,8 +53,7 @@ class BertPlusCNN(BertPreTrainedModel):
                                           input_mask,
                                           output_all_encoded_layers=False)
         output = pooled_output
-        #output = self.dropout(output)
-        print(output)
+        
         output = self.cnn(output)
 
         if labels is not None:
