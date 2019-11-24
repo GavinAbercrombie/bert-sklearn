@@ -64,8 +64,7 @@ class FinetuneConfig:
 
     """
     def __init__(self, tokenizer=None, max_seq_length=64, train_sampler='random',
-                 drop_last_batch=False, val_frac=0.15, label2id=None,
-                 model_type="classifier", epochs=1, learning_rate=2e-5,
+                 drop_last_batch=False, val_frac=0.15, label2id=None, epochs=1, learning_rate=2e-5,
                  warmup_proportion=0.1, train_batch_size=32, eval_batch_size=8,
                  gradient_accumulation_steps=1, local_rank=-1, fp16=False,
                  loss_scale=0, use_cuda=True, logger=None, ignore_label=None,
@@ -77,7 +76,6 @@ class FinetuneConfig:
         self.drop_last_batch = drop_last_batch
         self.val_frac = val_frac
         self.label2id = label2id
-        self.model_type = model_type
         self.epochs = epochs
         self.learning_rate = learning_rate
         self.warmup_proportion = warmup_proportion
@@ -107,7 +105,6 @@ class FinetuneConfig:
 def model2config(model):
     return FinetuneConfig(
         tokenizer=model.tokenizer,
-        model_type=model.model_type,
         epochs=model.epochs,
         max_seq_length=model.max_seq_length,
         learning_rate=model.learning_rate,
