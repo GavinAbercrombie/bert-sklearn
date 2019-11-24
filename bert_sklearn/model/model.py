@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from .pytorch_pretrained import BertModel
 from .pytorch_pretrained import BertPreTrainedModel
