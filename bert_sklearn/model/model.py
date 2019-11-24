@@ -51,7 +51,7 @@ class BertPlusCNN(BertPreTrainedModel):
         hidden, pooled_output = self.bert(input_ids,
                                           segment_ids,
                                           input_mask,
-                                          output_all_encoded_layers=False)
+                                          output_all_encoded_layers=True)
         output = pooled_output
         print('SIZE:', output.shape)
         output = self.cnn(output)
