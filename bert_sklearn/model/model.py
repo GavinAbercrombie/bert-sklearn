@@ -8,8 +8,8 @@ from .pytorch_pretrained import BertPreTrainedModel
 def LinearBlock(H1, H2, p):
     return nn.Sequential(
         nn.Linear(H1, H2),
-        nn.BatchNorm1d(H2),
-        nn.ReLU())#,
+        nn.BatchNorm1d(H2))#,
+        #nn.ReLU())#,
         #nn.Dropout(p))
 
 def CNN(D, n, H, K, p):
@@ -67,7 +67,6 @@ class BertPlusCNN(BertPreTrainedModel):
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.bert = BertModel(config)
         self.input_dim = config.hidden_size
-        self.num_mlp_layers = num_mlp_layers
 
         self.cnn = CNN(D=self.input_dim,
                        n=self.num_mlp_layers,
