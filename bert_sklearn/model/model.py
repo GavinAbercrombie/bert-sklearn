@@ -17,7 +17,7 @@ def CNN(D):
     """
     
     print("Using CNN with D=%d"%(D))
-    conv1 = nn.Conv1d(D, 2, 2)
+    conv1 = nn.Conv2d(1, 100, (3, D))
     #nn.MaxPool1d(1),
     #nn.Linear(D, 2)]
     return torch.nn.Sequential(conv1)
@@ -51,7 +51,7 @@ class BertPlusCNN(BertPreTrainedModel):
         hidden, pooled_output = self.bert(input_ids,
                                           segment_ids,
                                           input_mask,
-                                          output_all_encoded_layers=True)
+                                          output_all_encoded_layers=False)
         output = pooled_output
         print('SIZE:', output.shape)
         output = self.cnn(output)
