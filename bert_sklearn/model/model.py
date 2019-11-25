@@ -43,6 +43,7 @@ class BertPlusCNN(BertPreTrainedModel):
                  num_mlp_hiddens=500):
 
         super(BertPlusCNN, self).__init__(config)
+        self.num_mlp_hiddens = num_mlp_hiddens
         
         self.bert = BertModel(config)
         self.input_dim = config.hidden_size
