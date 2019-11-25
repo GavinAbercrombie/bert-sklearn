@@ -27,12 +27,18 @@ def CNN(D, n, H, K, p):
     
     #print("Using cnn with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
     #return nn.Linear(D, 2) #linear takes input layer, no. classes
-    layers = [nn.BatchNorm1d(D),
+    return(torch.nn(
+           Sequential(
+           nn.BatchNorm1d(D),
+           nn.Linear(H1, H2),
+           nn.BatchNorm1d(H2),
+           nn.Linear(H, K))
+    """layers = [nn.BatchNorm1d(D),
               LinearBlock(D, H, p)]
     for _ in range(n-1):
         layers.append(LinearBlock(H, H, p))
     layers.append(nn.Linear(H, K))
-    return torch.nn.Sequential(*layers)
+    return torch.nn.Sequential(*layers)"""
     """layers = [nn.Linear(D, H),
               nn.BatchNorm1d(H),
               nn.ReLU()]
