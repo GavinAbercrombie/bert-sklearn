@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from .pytorch_pretrained import BertModel
 from .pytorch_pretrained import BertPreTrainedModel
 
-def CNN(D):
+def CNN(D, H):
     """
     CNN.
 
@@ -44,7 +44,8 @@ class BertPlusCNN(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.input_dim = config.hidden_size
 
-        self.cnn = CNN(D=self.input_dim)
+        self.cnn = CNN(D=self.input_dim,
+                       H=self..num_mlp_hiddens)
 
         self.apply(self.init_bert_weights)
 
