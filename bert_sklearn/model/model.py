@@ -21,7 +21,7 @@ def CNN(D, n, H, K, p):
     D : int, size of input layer
     n : int, number of hidden layers
     H : int, size of hidden layer
-    K : int, size of output layer
+    K : int, size of output layer (no of labels)
     p : float, dropout probability
     """
     
@@ -60,6 +60,8 @@ class BertPlusCNN(BertPreTrainedModel):
                  num_mlp_hiddens=100):
 
         super(BertPlusCNN, self).__init__(config)
+        self.num_labels = num_labels
+        self.num_mlp_layers = num_mlp_layers
         self.num_mlp_hiddens = num_mlp_hiddens
         
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
@@ -70,6 +72,7 @@ class BertPlusCNN(BertPreTrainedModel):
         self.cnn = CNN(D=self.input_dim,
                        n=self.num_mlp_layers,
                        H=self.num_mlp_hiddens,
+                       K=self.num_labels
                        p=config.hidden_dropout_prob)
 
         self.apply(self.init_bert_weights)
