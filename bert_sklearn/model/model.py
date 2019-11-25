@@ -17,7 +17,8 @@ def CNN(D):
     """
     
     print("Using CNN with D=%d"%(D))
-    conv1 = nn.Conv2d(1, 100, (3, D))
+    nn.BatchNorm1d(D), nn.Linear(D, H))
+    #conv1 = nn.Conv2d(1, 100, (3, D))
     #nn.MaxPool1d(1),
     #nn.Linear(D, 2)]
     return torch.nn.Sequential(conv1)
