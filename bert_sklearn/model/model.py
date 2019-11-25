@@ -12,7 +12,7 @@ def LinearBlock(H1, H2, p):
         nn.ReLU(),
         nn.Dropout(p))
 
-def CNN(D, H, p):
+def CNN(D, n, H, p):
     """
     CNN.
 
