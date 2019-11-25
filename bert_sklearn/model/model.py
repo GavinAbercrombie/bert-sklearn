@@ -20,7 +20,7 @@ def CNN(D, H):
     print("Using CNN with D=%d"%(D))
     #return nn.Linear(D, 2) #linear takes input layer, no. classes
     return(nn.Sequential(
-        nn.BatchNorm1d(D)
+        nn.BatchNorm1d(D),
         nn.Linear(H, H),
         nn.BatchNorm1d(H),
         nn.ReLU(),
