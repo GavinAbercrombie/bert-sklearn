@@ -5,6 +5,12 @@ import torch.nn.functional as F
 from .pytorch_pretrained import BertModel
 from .pytorch_pretrained import BertPreTrainedModel
 
+def LinearBlock(H1, H2, p):
+    return nn.Sequential(
+        nn.Linear(H1, H2),
+        nn.BatchNorm1d(H2),
+        nn.ReLU(),
+        nn.Dropout(p))
 
 def CNN(D, H):
     """
@@ -13,19 +19,20 @@ def CNN(D, H):
     Parameters
     ----------
     D : int, size of input layer
+    n : int, number of hidden layers
     H : int, size of hidden layer
     K : int, size of output layer
+    p : float, dropout probability
     """
     
-    print("Using CNN with D=%d"%(D))
+    print("Using CNN with D=%d,H=%d%"(D))
     #return nn.Linear(D, 2) #linear takes input layer, no. classes
-    return(nn.Sequential(
-        nn.BatchNorm1d(D),
-        nn.Linear(H, H),
-        nn.BatchNorm1d(H),
-        nn.ReLU(),
-        nn.Dropout(0.1),
-        nn.Linear(H, 2)))
+    layers = [nn.BatchNorm1d(D),
+              LinearBlock(D, H, p)]
+    for _ in range(n-1):
+        layers.append(LinearBlock(H, H, p))
+    layers.append(nn.Linear(H, K))
+    return torch.nn.Sequential(*layers)
     """layers = [nn.Linear(D, H),
               nn.BatchNorm1d(H),
               nn.ReLU()]
@@ -50,16 +57,18 @@ class BertPlusCNN(BertPreTrainedModel):
     def __init__(self, config,
                  num_labels=2,
                  num_mlp_layers=2,
-                 num_mlp_hiddens=500):
+                 num_mlp_hiddens=100):
 
         super(BertPlusCNN, self).__init__(config)
         self.num_mlp_hiddens = num_mlp_hiddens
         
+        self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.bert = BertModel(config)
         self.input_dim = config.hidden_size
 
         self.cnn = CNN(D=self.input_dim,
-                       H=self.num_mlp_hiddens)
+                       H=self.num_mlp_hiddens,
+                       p=config.hidden_dropout_prob)
 
         self.apply(self.init_bert_weights)
 
@@ -70,6 +79,7 @@ class BertPlusCNN(BertPreTrainedModel):
                                           input_mask,
                                           output_all_encoded_layers=False)
         output = pooled_output
+        output = self.dropout(output)
         
         output = self.cnn(output)
 
