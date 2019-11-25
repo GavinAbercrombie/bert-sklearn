@@ -60,7 +60,7 @@ class BertPlusCNN(BertPreTrainedModel):
                                           input_mask,
                                           output_all_encoded_layers=False)
         output = pooled_output
-        print('SIZE:', output.shape)
+        
         output = self.cnn(output)
 
         if labels is not None:
