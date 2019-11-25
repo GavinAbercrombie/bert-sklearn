@@ -65,8 +65,10 @@ class BertPlusCNN(BertPreTrainedModel):
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.bert = BertModel(config)
         self.input_dim = config.hidden_size
+        self.num_mlp_layers = num_mlp_layers
 
         self.cnn = CNN(D=self.input_dim,
+                       n=self.num_mlp_layers,
                        H=self.num_mlp_hiddens,
                        p=config.hidden_dropout_prob)
 
