@@ -31,8 +31,8 @@ def CNN(D, n, H, K, p):
            nn.Sequential(
                nn.BatchNorm1d(D),
                nn.Linear(D, H),
-               nn.BatchNorm1d(H),
-               nn.Linear(H, K))))
+               nn.BatchNorm1d(H)#,
+               ))) # nn.Linear(H, K)
     """layers = [nn.BatchNorm1d(D),
               LinearBlock(D, H, p)]
     for _ in range(n-1):
