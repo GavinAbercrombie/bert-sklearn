@@ -117,9 +117,10 @@ def finetune(model, X1, X2, y, config):
         batch_iter = pbar(train_dl, desc="Training  ", leave=True)
 
         for step, batch in enumerate(batch_iter):
-            print('step, batch', step, batch)
             batch = tuple(t.to(device) for t in batch)
+            print('batch', batch)
             loss, _ = model(*batch)
+            print('loss', loss)
 
             loss = loss.mean()
 
