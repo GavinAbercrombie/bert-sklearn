@@ -37,7 +37,10 @@ class BertPlusCNN(BertPreTrainedModel):
         stores configuration of BertModel
     """
 
-    def __init__(self, config):
+    def __init__(self, config,
+                 num_labels=2,
+                 num_mlp_layers=2,
+                 num_mlp_hiddens=500):
 
         super(BertPlusCNN, self).__init__(config)
         
