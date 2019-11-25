@@ -54,8 +54,8 @@ def finetune(model, X1, X2, y, config):
     Bert model inputs are triples of: (text_a,text_b,label).
     For single text tasks text_b = None
 
-    model : BertPlusMLP
-        pretrained Bert model with a MLP classifier/regressor head
+    model : BertPlusCNN
+        pretrained Bert model with a CNN classifier head
 
     X1 : list of strings
         First of a pair of input text data, texts_a
@@ -71,8 +71,8 @@ def finetune(model, X1, X2, y, config):
 
     Returns
     --------
-    model : BertPlusMLP
-        finetuned BERT model plus mlp head
+    model : BertPlusCNN
+        finetuned BERT model plus cnn head
 
     """
 
@@ -161,8 +161,8 @@ def eval_model(model, dataloader, config, desc="Validating"):
 
     Parameters
     ----------
-    model : BertPlusMLP
-        Bert model plus mlp head
+    model : BertPlusCNN
+        Bert model plus cnn head
     dataloader : Dataloader
         validation dataloader
     config : FinetuneConfig
@@ -179,7 +179,7 @@ def eval_model(model, dataloader, config, desc="Validating"):
         Pearson coorelation for regressors.
     """
     device = config.device
-    model_type = config.model_type
+    
     ignore_label = config.ignore_label_id
 
     regression_stats = OnlinePearson()
@@ -201,46 +201,13 @@ def eval_model(model, dataloader, config, desc="Validating"):
             tmp_eval_loss, output = model(*batch)
         loss += tmp_eval_loss.mean().item()
 
-        if model_type == "text_classifier":
-            _, y_pred = torch.max(output, 1)
-            accy += torch.sum(y_pred == y)
-
-        elif model_type == "text_regressor":
-            y_pred = output
-
-            # add to online stats calculator
-            for xi, yi in zip(y.detach().cpu().numpy(),
-                              y_pred.detach().cpu().numpy()):
-                regression_stats.add(xi, yi)
-
-        elif model_type == "token_classifier":
-
-            output = output.view(-1, output.shape[-1])
-            y_true = y.view(-1)
-            valid_tokens = y_true != -1
-
-            _, y_pred = torch.max(output, 1)
-
-            accy += torch.sum(y_pred[valid_tokens] == y_true[valid_tokens])
-            total_evals += torch.sum(valid_tokens).item()
-
-            y_true = y_true[valid_tokens].detach().cpu().numpy()
-            y_pred = y_pred[valid_tokens].detach().cpu().numpy()
-
-            # add to online stats calculator
-            stats.add(y_true=y_true, y_pred=y_pred)
+        _, y_pred = torch.max(output, 1)
+        accy += torch.sum(y_pred == y)
+        
 
     loss = loss/(eval_steps+1)
 
-    if model_type == "text_classifier":
-        accy = 100 * (accy.item() / len(dataloader.dataset))
-    elif model_type == "text_regressor":
-        accy = 100 * regression_stats.pearson
-    elif model_type == "token_classifier":
-        accy = 100 * (accy.item() / total_evals)
-        res['f1'] = stats.f1
-        res['precision'] = stats.precision
-        res['recall'] = stats.recall
+    accy = 100 * (accy.item() / len(dataloader.dataset))
 
     res['loss'] = loss
     res['accy'] = accy
