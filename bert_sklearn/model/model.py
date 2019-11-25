@@ -17,14 +17,20 @@ def CNN(D, H):
     """
     
     print("Using CNN with D=%d"%(D))
-    return nn.Linear(D, 2)
+    #return nn.Linear(D, 2) #linear takes input layer, no. classes
+    nn.Sequential(
+        nn.Linear(H, H),
+        nn.BatchNorm1d(H),
+        nn.ReLU(),
+        nn.Dropout(0.1),
+        nn.Linear(H, 2))
     """layers = [nn.Linear(D, H),
               nn.BatchNorm1d(H),
               nn.ReLU()]
     #conv1 = nn.Conv2d(1, 100, (3, D))
     #nn.MaxPool1d(1),
-    #nn.Linear(D, 2)]
-    return torch.nn.Sequential(*layers)"""
+    #nn.Linear(D, 2)]"""
+    return torch.nn.Sequential(*layers)
 
 
 class BertPlusCNN(BertPreTrainedModel):
