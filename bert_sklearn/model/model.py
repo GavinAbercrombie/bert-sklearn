@@ -25,7 +25,7 @@ def CNN(D, n, H, p):
     p : float, dropout probability
     """
     
-    print("Using CNN with D=%d,H=%d,n=%d%"%(D, H, n))
+    print("Using cnn with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
     #return nn.Linear(D, 2) #linear takes input layer, no. classes
     layers = [nn.BatchNorm1d(D),
               LinearBlock(D, H, p)]
