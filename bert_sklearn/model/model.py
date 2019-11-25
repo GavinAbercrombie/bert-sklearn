@@ -72,7 +72,7 @@ class BertPlusCNN(BertPreTrainedModel):
         self.cnn = CNN(D=self.input_dim,
                        n=self.num_mlp_layers,
                        H=self.num_mlp_hiddens,
-                       K=self.num_labels
+                       K=self.num_labels,
                        p=config.hidden_dropout_prob)
 
         self.apply(self.init_bert_weights)
