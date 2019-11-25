@@ -30,8 +30,8 @@ def CNN(D, n, H, K, p):
     return(torch.nn(
            nn.Sequential(
                nn.BatchNorm1d(D),
-               nn.Linear(H1, H2),
-               nn.BatchNorm1d(H2),
+               nn.Linear(D, H),
+               nn.BatchNorm1d(H),
                nn.Linear(H, K))))
     """layers = [nn.BatchNorm1d(D),
               LinearBlock(D, H, p)]
