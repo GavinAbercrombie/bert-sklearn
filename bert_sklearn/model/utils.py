@@ -41,6 +41,8 @@ def get_tokenizer(bert_model='bert-base-uncased',
 def get_model(bert_model='bert-base-uncased',
               bert_config_json=None,
               from_tf=False,
+              num_mlp_layers=0,
+              num_mlp_hiddens=500
               state_dict=None,
               local_rank=-1):
     """
@@ -69,12 +71,16 @@ def get_model(bert_model='bert-base-uncased',
         model = BertPlusCNN.from_model_ckpt(config_file_or_dict=bert_config_json,
                                             weights_path=bert_model,
                                             state_dict=state_dict,
-                                            from_tf=from_tf)
+                                            from_tf=from_tf,
+                                            num_mlp_hiddens=num_mlp_hiddens,
+                                            num_mlp_layers=num_mlp_layers)
     else:
         # Load from pre-trained model archive
         print("Loading %s model..."%(bert_model))
         model = BertPlusCNN.from_pretrained(bert_model,
                                             cache_dir=cache_dir,
-                                            state_dict=state_dict)
+                                            state_dict=state_dict,
+                                            num_mlp_hiddens=num_mlp_hiddens,
+                                            num_mlp_layers=num_mlp_layers)
 
     return model
