@@ -9,8 +9,8 @@ def LinearBlock(H1, H2, p):
     return nn.Sequential(
         nn.Linear(H1, H2),
         nn.BatchNorm1d(H2))#,
-        #nn.ReLU())#,
-        #nn.Dropout(p))
+        nn.ReLU())#,
+        nn.Dropout(p))
 
 def CNN(D, n, H, K, p):
     """
@@ -33,19 +33,12 @@ def CNN(D, n, H, K, p):
                nn.Linear(D, H),
                nn.BatchNorm1d(H)#,
                ))) # nn.Linear(H, K)
-    """layers = [nn.BatchNorm1d(D),
+    layers = [nn.BatchNorm1d(D),
               LinearBlock(D, H, p)]
     for _ in range(n-1):
         layers.append(LinearBlock(H, H, p))
     layers.append(nn.Linear(H, K))
-    return torch.nn.Sequential(*layers)"""
-    """layers = [nn.Linear(D, H),
-              nn.BatchNorm1d(H),
-              nn.ReLU()]
-    #conv1 = nn.Conv2d(1, 100, (3, D))
-    #nn.MaxPool1d(1),
-    #nn.Linear(D, 2)]"""
-    #return torch.nn.Sequential(*layers)
+    return torch.nn.Sequential(*layers)
 
 
 class BertPlusCNN(BertPreTrainedModel):
