@@ -42,7 +42,7 @@ def get_model(bert_model='bert-base-uncased',
               bert_config_json=None,
               from_tf=False,
               num_mlp_layers=0,
-              num_mlp_hiddens=500
+              num_mlp_hiddens=500,
               state_dict=None,
               local_rank=-1):
     """
