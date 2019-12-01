@@ -79,6 +79,7 @@ class BertPlusCNN(BertPreTrainedModel):
         output = self.dropout(output)
         #print('Dropout output', type(output), output.shape) # torch.Size([8, 768])
         output = self.cnn(output)
+        print('Output', type(output), output.shape)
 
         if labels is not None:
             loss_criterion = nn.CrossEntropyLoss(reduction='none')
