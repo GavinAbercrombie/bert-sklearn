@@ -25,8 +25,6 @@ def CNN(D, n, H, K, p):
     p : float, dropout probability
     """
     
-    #print("Using cnn with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
-    #return nn.Linear(D, 2) #linear takes input layer, no. classes
     print("Using mlp with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
     layers = [nn.BatchNorm1d(D),
               LinearBlock(D, H, p)]
@@ -77,7 +75,7 @@ class BertPlusCNN(BertPreTrainedModel):
                                           input_mask,
                                           output_all_encoded_layers=False)
         output = pooled_output
-        print(type(output), output.shape)
+        #print(type(output), output.shape) # torch.Size([8, 768]) -- batch size, length
         output = self.dropout(output)
         
         output = self.cnn(output)
