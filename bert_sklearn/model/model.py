@@ -27,7 +27,7 @@ def CNN(D, n, H, K, p):
     
     print("Using mlp with D=%d,H=%d,K=%d,n=%d"%(D, H, K, n))
     
-    return torch.nn.Sequential(nn.Conv1d(8, K, 1))
+    return torch.nn.Sequential(nn.Conv1d(K, D, kernel_size=2))
     #layers = [nn.BatchNorm1d(D),
     #          LinearBlock(D, H, p)]
     #for _ in range(n-1):
