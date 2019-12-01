@@ -7,8 +7,8 @@ from .pytorch_pretrained import BertPreTrainedModel
 
 def LinearBlock(H1, H2, p):
     return nn.Sequential(
-        nn.Linear(H1, H2),
-        nn.BatchNorm1d(H2))#,
+        nn.Linear(H1, H2))#,
+        #nn.BatchNorm1d(H2))#,
         #nn.ReLU())#,
         #nn.Dropout(p))
 
