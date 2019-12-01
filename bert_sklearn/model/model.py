@@ -77,6 +77,7 @@ class BertPlusCNN(BertPreTrainedModel):
                                           input_mask,
                                           output_all_encoded_layers=False)
         output = pooled_output
+        print(type(output), output.shape)
         output = self.dropout(output)
         
         output = self.cnn(output)
