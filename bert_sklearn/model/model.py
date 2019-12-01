@@ -77,7 +77,7 @@ class BertPlusCNN(BertPreTrainedModel):
         output = pooled_output
         #print(type(output), output.shape) # torch.Size([8, 768]) -- batch size, length
         output = self.dropout(output)
-        print('Dropout output', type(output), output.shape)
+        #print('Dropout output', type(output), output.shape) # torch.Size([8, 768])
         output = self.cnn(output)
 
         if labels is not None:
